@@ -8,3 +8,4 @@ for f in *; do
     echo "Skipping file $f"
   fi
 done
+RenamePlaylist.sh
