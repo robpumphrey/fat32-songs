@@ -43,10 +43,8 @@ if [ "${artist} = "" ]; then
   echo "Set artist with -a"
   exit 1
 fi
-if [ ! -e playlist.m3u ]; then
-  echo "Must have a playlist.m3u file"
-  exit 1
-fi
+echo "Artist:  ${artist}"
+echo "Album:   ${album}"
 echo "Diretories to use are "
 ls -1d $pattern
 echo ""
@@ -57,19 +55,26 @@ read carryon
 playlistname=`echo "${artist}-${album}" | sed -e 's/ //g'`
 trackname=`echo "${album}" | sed -e 's/ //g'`
 track=1
-targetdir="../${artist}-${album}/"
+targetdir="../${playlistname}/"
 mkdir "${targetdir}"
 
 fullplaylist="${targetdir}/${playlistname}.m3u"
 echo -n "" > "${fullplaylist}"
 IFS='
 '
+
+for d in $pattern; do
+  if [ ! -e "${d}/playlist.m3u" ]; then
+    echo "Must have a playlist.m3u file in directory $d"
+    exit 1
+  fi
+done
 for d in $pattern; do
   for f in `cat "$d/playlist.m3u"`; do
     printf -v g "%s-%02d.mp3" $trackname $track
     echo "$g" >> ${fullplaylist}
-    echo "copying $f to ${targetdir}$g"
-    cp "$f" "${targetdir}$g"
+    echo "copying $d/$f to ${targetdir}$g"
+    cp "$d/$f" "${targetdir}$g"
     printf -v chapter "%02d" $track
     id3 -t "Chapter $track" -T $track -a "${artist}" -A "${album}" -y "${year}" -g "${genre}" "${targetdir}$g"
     let track=$track+1
